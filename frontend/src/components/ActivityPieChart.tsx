@@ -13,6 +13,7 @@ interface ActivityPieChartProps {
   logs: LogEntry[];
 }
 
+// Custom tooltip component
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -28,13 +29,16 @@ const CustomTooltip = ({ active, payload }: any) => {
           color: "purple"
         }}
       >
-        <>
-          <p style={{ fontWeight: "bold", textDecoration: "underline" }}>{data.name}</p>
-          <p>Total Time: {data.value} mins</p>
-          {Object.entries(data.details).map(([activity, mins]) => (
-            <p key={activity}>{activity}: {mins} mins</p>
-          ))}
-        </>
+        <p style={{ fontWeight: "bold", textDecoration: "underline" }}>{data.name}</p>
+        <p>Total Time: {data.value} mins</p>
+        <div>
+          {React.Children.toArray(
+            Object.entries(data.details).map(([activity, mins]) => (
+              <p key={activity}>{activity}: {String(mins)} mins</p>
+
+            ))
+          )}
+        </div>
       </div>
     );
   }
@@ -64,6 +68,7 @@ export default function ActivityPieChart({ logs }: ActivityPieChartProps): React
     relevantLogs = monthly[monthKey] || [];
   }
 
+  // Aggregate by activity type and keep breakdown details per activity name
   const activityAggregation = useMemo(() => {
     const map: Record<string, { total: number; details: Record<string, number> }> = {};
     relevantLogs.forEach((entry) => {
@@ -104,11 +109,11 @@ export default function ActivityPieChart({ logs }: ActivityPieChartProps): React
           <option value="month">This Month</option>
         </select>
       </div>
-      
+      {/* Adjust container to display full pie chart */}
       <div style={{ width: "50%", minWidth: "400px", height: "400px", margin: "0 auto" }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-           
+            {/* Increase outer radius by 50% (from 120 to 180) */}
             <Pie data={pieData} dataKey="value" outerRadius={180} label>
               {pieData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={backgroundColors[index % backgroundColors.length]} />
